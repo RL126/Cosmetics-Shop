@@ -198,5 +198,5 @@ model_explain.py  feature importance, targeting table and gains chart
 To reproduce the results, download `2019-Nov.csv` from Kaggle into the project
 folder and install the packages with
 `pip install duckdb pandas scipy scikit-learn matplotlib`. Then run `load.py`
-once, run the SQL files in order with `python run.py sql/<file>.sql`, and
-finally run `analysis.py`, `charts.py`, `model.py` and `model_explain.py`.
+once, run all the SQL files with `python run.py`, and finally run
+`analysis.py`, `charts.py`, `model.py` and `model_explain.py`.
