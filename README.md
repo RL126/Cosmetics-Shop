@@ -200,3 +200,6 @@ folder and install the packages with
 `pip install duckdb pandas scipy scikit-learn matplotlib`. Then run `load.py`
 once, run all the SQL files with `python run.py`, and finally run
 `analysis.py`, `charts.py`, `model.py` and `model_explain.py`.
+
+**Interactive dashboard:** 
+[View on Tableau Public](https://public.tableau.com/views/CosmeticsShopFunnelDashboard/Dashboard)

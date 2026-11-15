@@ -1,5 +1,5 @@
 -- 09_products.sql
-CREATE TABLE product_stats AS
+CREATE or REPLACE TABLE product_stats AS
 SELECT
     product_id,
     ANY_VALUE(brand) AS brand,
