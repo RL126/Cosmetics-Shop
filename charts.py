@@ -1,6 +1,4 @@
-# charts.py
-# Draw the 5 charts for the report and save them into the charts/ folder
-
+# charts 1-5 for the readme, saved into charts/
 import os
 import duckdb
 import matplotlib.pyplot as plt
@@ -8,7 +6,6 @@ import matplotlib.pyplot as plt
 con = duckdb.connect("ecom.duckdb")
 os.makedirs("charts", exist_ok=True)
 
-# Shared style
 plt.rcParams.update({"figure.dpi": 120, "font.size": 11,
                      "axes.spines.top": False, "axes.spines.right": False})
 BLUE, GREY, RED = "#2563eb", "#9ca3af", "#dc2626"
@@ -18,10 +15,10 @@ def save(fig, name):
     fig.tight_layout()
     fig.savefig(f"charts/{name}.png", dpi=200)
     plt.close(fig)
-    print("saved charts/" + name + ".png")
+    print("saved", name)
 
 
-# ---------- Chart 1: User-level funnel ----------
+# 1. funnel
 f = con.sql("""
     SELECT
         COUNT(*) FILTER (WHERE has_view)                               AS viewed,
@@ -36,27 +33,27 @@ values = [f["viewed"], f["carted"], f["purchased"]]
 fig, ax = plt.subplots(figsize=(8, 3.5))
 bars = ax.barh(steps[::-1], values[::-1], color=BLUE)
 for bar, v in zip(bars, values[::-1]):
-    ax.text(bar.get_width(), bar.get_y() + bar.get_height() / 2,
-            f"  {v:,}", va="center")
-# Step conversion rates
+    ax.text(bar.get_width(), bar.get_y() + bar.get_height() / 2, f"  {v:,}", va="center")
 ax.text(values[1], 1.45, f"{values[1] / values[0]:.1%} of viewers", color=GREY, fontsize=9)
 ax.text(values[2], 0.45, f"{values[2] / values[1]:.1%} of carters", color=GREY, fontsize=9)
 ax.set_xlim(0, values[0] * 1.2)
+ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v / 1000:.0f}k"))
 ax.set_xlabel("Users")
 ax.set_title("User-level conversion funnel (Nov 2019)")
-ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v/1000:.0f}k"))
 save(fig, "1_funnel")
 
 
-# ---------- Chart 2: Daily buyers with peak days ----------
+# 2. buyers per day, peak days in red
 d = con.sql("SELECT * FROM daily_tagged ORDER BY event_date").df()
 threshold = 1.5 * d["purchase_users"].median()
 peak = d[d["day_type"] == "Peak Day"]
 
 fig, ax = plt.subplots(figsize=(10, 4))
-ax.plot(d["event_date"], d["purchase_users"], color=BLUE, marker="o", markersize=3, label="Buyers per day")
+ax.plot(d["event_date"], d["purchase_users"], color=BLUE, marker="o", markersize=3,
+        label="Buyers per day")
 ax.scatter(peak["event_date"], peak["purchase_users"], color=RED, zorder=3, label="Peak day")
-ax.axhline(threshold, color=GREY, linestyle="--", linewidth=1, label=f"1.5 x median ({threshold:.0f})")
+ax.axhline(threshold, color=GREY, linestyle="--", linewidth=1,
+           label=f"1.5 x median ({threshold:.0f})")
 ax.set_ylabel("Buyers")
 ax.set_title("Daily buyers: 8 peak days in November")
 ax.legend(frameon=False)
@@ -64,7 +61,7 @@ fig.autofmt_xdate()
 save(fig, "2_daily_buyers")
 
 
-# ---------- Chart 3: Peak vs normal conversion rates ----------
+# 3. peak vs normal conversion
 d["view_to_cart"] = d["cart_users"] / d["view_users"] * 100
 d["cart_to_purchase"] = d["purchase_users"] / d["cart_users"] * 100
 d["purchase_rate"] = d["purchase_users"] / d["active_users"] * 100
@@ -88,7 +85,7 @@ ax.legend(frameon=False)
 save(fig, "3_peak_vs_normal")
 
 
-# ---------- Chart 4: Time from first cart to purchase ----------
+# 4. time from first add-to-cart to purchase
 t = con.sql("""
     SELECT
         CASE
@@ -116,7 +113,7 @@ ax.set_title("Time from first add-to-cart to purchase (median 79 min)")
 save(fig, "4_cart_to_purchase_time")
 
 
-# ---------- Chart 5: Conversion by price band ----------
+# 5. conversion by price band
 p = con.sql("""
     WITH b AS (
         SELECT *,
